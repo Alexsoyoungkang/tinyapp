@@ -9,6 +9,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
+});
+
 app.get("/", (req, res) => { // client sends a Get request to /
   res.send("Hello!");  // server sends the response back to the client
 });
