@@ -14,6 +14,11 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
 });
 
+app.get("/urls/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  res.render("urls_show", templateVars);
+});
+
 app.get("/", (req, res) => { // client sends a Get request to /
   res.send("Hello!");  // server sends the response back to the client
 });
