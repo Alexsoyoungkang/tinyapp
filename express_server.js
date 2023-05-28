@@ -34,7 +34,10 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const shortURL = generateRandomString(); // generate a random short URL
+  const longURL = req.body.longURL; // get the long URL from the request body
+  urlDatabase[shortURL] = longURL; // save the id-longURL pair to the urlDatabase
+  res.redirect(`/urls/${shortURL}`); // redirect the user to the show page for the new short URL
 });
 
 app.get("/urls/:id", (req, res) => {
