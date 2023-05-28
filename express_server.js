@@ -59,6 +59,13 @@ app.get("/", (req, res) => { // client sends a Get request to /
   res.send("Hello!");  // server sends the response back to the client
 });
 
+// Delete
+app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
+  const userInput = req.params.id;
+  delete urlDatabase[userInput];
+  res.redirect("/urls");
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -67,7 +74,7 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n"); //server sends the response using HTML code to the client
 });
 
-app.listen(PORT, () => { //listener 
+app.listen(PORT, () => { //listener
   console.log(`Example app listening on port ${PORT}!`);
 });
 
