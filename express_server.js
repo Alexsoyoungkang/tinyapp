@@ -40,9 +40,19 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
   res.redirect(`/urls/${shortURL}`); // redirect the user to the show page for the new short URL
 });
 
+
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id]; // bring the longURL associated with the shortURL id
+  if (longURL) {
+    res.redirect(longURL); //redirect to its longURL
+  } else {
+    res.send("<html><body>Requested URL not found</body></html>\n");
+  }
 });
 
 app.get("/", (req, res) => { // client sends a Get request to /
@@ -57,7 +67,7 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n"); //server sends the response using HTML code to the client
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, () => { //listener 
   console.log(`Example app listening on port ${PORT}!`);
 });
 
