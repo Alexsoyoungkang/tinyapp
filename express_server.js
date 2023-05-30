@@ -59,6 +59,16 @@ app.get("/", (req, res) => { // client sends a Get request to /
   res.send("Hello!");  // server sends the response back to the client
 });
 
+// Update
+app.post("/urls/:id", (req, res) => {
+  const id = req.params.id; // short URL
+  const newURL = req.body.longURL; // get the updated URL(name="longURL") from the request body
+  urlDatabase[id] = newURL; // update the new long URL into the urlDatabase
+  res.redirect("/urls");
+});
+
+
+
 // Delete
 app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   const userInput = req.params.id;
