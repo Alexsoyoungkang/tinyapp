@@ -22,7 +22,14 @@
         </p>
       </div>
       <div class="card-footer text-muted">
-        <a href="#" class="button">Create New URL</a>
+       <!-- <a href="#" class="button">Create New URL</a> -->
+       <h3>Edit</h3>
+          <div>
+            <form method="POST" action="/urls/<%= id %>">
+            <label for="newURL">New URL:</label>
+            <input type="text" name="longURL" placeholder="http://">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
       </div>
     </div>
     <!-- Bootstrap JS -->
