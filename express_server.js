@@ -76,6 +76,13 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   res.redirect("/urls");
 });
 
+// Login
+app.post("/login", (req, res) => {
+  const inputUserName = req.body.username; // grab the entered data from the form field
+  res.cookie("username", inputUserName); // set the value(inputUserName = req.body.username) to name(username)
+  res.redirect("/urls");
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
