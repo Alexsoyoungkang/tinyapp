@@ -26,12 +26,18 @@ const urlDatabase = {
 };
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new"); // show the form
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
@@ -44,7 +50,11 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
   res.render("urls_show", templateVars);
 });
 
