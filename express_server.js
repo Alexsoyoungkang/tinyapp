@@ -1,9 +1,11 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express(); // creates an instance of the express application
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs"); // let the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // create/populate req.cookies
 
 const generateRandomString = function() { // generating a "unique" Short URL id
   const length = 6;
