@@ -20,9 +20,25 @@ const generateRandomString = function() { // generating a "unique" Short URL id
   return result;
 };
 
+
+// URL Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+// User Database
+const users = {
+  abc: {
+    id: "abc123",
+    email: "user@a.com",
+    password: "123",
+  },
+  def: {
+    id: "def456",
+    email: "user2@a.com",
+    password: "456",
+  },
 };
 
 app.get("/urls", (req, res) => {
@@ -80,7 +96,6 @@ app.post("/urls/:id", (req, res) => {
 });
 
 
-
 // Delete
 app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   const userInput = req.params.id;
@@ -102,11 +117,22 @@ app.post("/logout", (req, res) => {
 });
 
 // Register
-app.get("/register", (req, res) => {
+app.get("/register", (req, res) => { // display the register form
   const templateVars = {
     username: req.cookies["username"]
   };
   res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {  // handle the registration form data
+  const id = generateRandomString(); // generate a random user id
+  users[id] = {
+    id : id,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie("user_id", id); //set the cookie named "user_id" with the value of the generated ID(id)
+  res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
