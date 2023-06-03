@@ -123,12 +123,35 @@ app.get("/register", (req, res) => { // display the register form
   res.render("urls_register", templateVars);
 });
 
+// Helper function to find a user by email
+const getUserByEmail = function(email) {
+  for (const eachUser in users) {
+    if (users[eachUser].email === email) {
+      return users[eachUser];
+    }
+  }
+  return null; // Return null if user not found
+};
+
 app.post("/register", (req, res) => {  // handle the registration form data
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // check if the e-mail or password are empty strings
+  if (!email || !password) {
+    return res.status(400).send("Please provide a username and password.");
+  }
+
+  // Check if the email already exists in the users object using the helper function
+  if (getUserByEmail(email)) {
+    return res.status(400).send("Provided email address is already exist.");
+  }
+  
   const id = generateRandomString(); // generate a random user id
   users[id] = {
     id : id,
-    email: req.body.email,
-    password: req.body.password
+    email: email,
+    password: password
   };
   res.cookie("user_id", id); //set the cookie named "user_id" with the value of the generated ID(id)
   res.redirect("/urls");
