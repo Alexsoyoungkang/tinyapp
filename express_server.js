@@ -29,12 +29,12 @@ const urlDatabase = {
 
 // User Database
 const users = {
-  abc: {
+  abc123: {
     id: "abc123",
     email: "user@a.com",
     password: "123",
   },
-  def: {
+  def456: {
     id: "def456",
     email: "user2@a.com",
     password: "456",
@@ -44,20 +44,19 @@ const users = {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]] //Retrieve the user object directly from the users database using the user_id cookie value
   };
   res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
-  console.log(req.body); // Log the POST request body to the console
   const shortURL = generateRandomString(); // generate a random short URL
   const longURL = req.body.longURL; // get the long URL from the request body
   urlDatabase[shortURL] = longURL; // save the id-longURL pair to the urlDatabase
@@ -69,7 +68,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -105,21 +104,21 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
 
 // Login
 app.post("/login", (req, res) => {
-  const inputUserName = req.body.username; // grab the entered data from the form field
-  res.cookie("username", inputUserName); // set the value(inputUserName = req.body.username) to name(username)
+  const inputUserEmail = req.body.id; // grab the entered data from the form field
+  res.cookie("user_id", inputUserEmail); // set the value, inputUserEmail to name("user_id")
   res.redirect("/urls");
 });
 
 // Logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
 // Register
 app.get("/register", (req, res) => { // display the register form
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
