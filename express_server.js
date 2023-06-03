@@ -41,6 +41,16 @@ const users = {
   },
 };
 
+// Helper function to find a user by email
+const getUserByEmail = function(email) {
+  for (const eachUser in users) {
+    if (users[eachUser].email === email) {
+      return users[eachUser];
+    }
+  }
+  return null; // Return null if user not found
+};
+
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -103,8 +113,16 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
 });
 
 // Login
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]] // identify users by the user_id
+  };
+  res.render("urls_login", templateVars);
+});
+
+
 app.post("/login", (req, res) => {
-  const inputUserEmail = req.body.id; // grab the entered data from the form field
+  const inputUserEmail = getUserByEmail(req.body.email).id; // grab the entered data from the form field
   res.cookie("user_id", inputUserEmail); // set the value, inputUserEmail to name("user_id")
   res.redirect("/urls");
 });
@@ -123,17 +141,8 @@ app.get("/register", (req, res) => { // display the register form
   res.render("urls_register", templateVars);
 });
 
-// Helper function to find a user by email
-const getUserByEmail = function(email) {
-  for (const eachUser in users) {
-    if (users[eachUser].email === email) {
-      return users[eachUser];
-    }
-  }
-  return null; // Return null if user not found
-};
-
 app.post("/register", (req, res) => {  // handle the registration form data
+  const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
 
@@ -144,10 +153,9 @@ app.post("/register", (req, res) => {  // handle the registration form data
 
   // Check if the email already exists in the users object using the helper function
   if (getUserByEmail(email)) {
-    return res.status(400).send("Provided email address is already exist.");
+    return res.status(400).send("The email address provided is already exist.");
   }
   
-  const id = generateRandomString(); // generate a random user id
   users[id] = {
     id : id,
     email: email,
