@@ -88,7 +88,7 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
-    id: req.params.id,
+    id: req.params.id, // short url
     longURL: urlDatabase.id,
     user: users[req.cookies["user_id"]]
   };
@@ -97,11 +97,11 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]; // bring the longURL associated with the shortURL id
-  if (longURL) {
-    res.redirect(longURL); //redirect to its longURL
-  } else {
-    res.send("Requested URL not found");
+  if (!longURL) {
+    return res.status(404).send("Requested Short URL does not exist."); //redirect to its longURL
   }
+  
+  res.redirect(longURL);
 });
 
 app.get("/", (req, res) => { // client sends a Get request to /
