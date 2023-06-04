@@ -77,7 +77,7 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase.id,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
@@ -88,7 +88,7 @@ app.get("/u/:id", (req, res) => {
   if (longURL) {
     res.redirect(longURL); //redirect to its longURL
   } else {
-    res.send("<html><body>Requested URL not found</body></html>\n");
+    res.send("Requested URL not found");
   }
 });
 
@@ -122,15 +122,26 @@ app.get("/login", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  const inputUserEmail = getUserByEmail(req.body.email).id; // grab the entered data from the form field
-  res.cookie("user_id", inputUserEmail); // set the value, inputUserEmail to name("user_id")
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!getUserByEmail(email)) {  // check if the email is registered
+    return res.status(403).send("Email you provided cannot be found");
+  }
+
+  if (getUserByEmail(email).password !== password) { // check if the password is correct
+    return res.status(403).send("Wrong password. Try again");
+  }
+
+  const userId = getUserByEmail(email).id; // grab the entered data from the form field
+  res.cookie("user_id", userId); // set the value, userId to name("user_id")
   res.redirect("/urls");
 });
 
 // Logout
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 // Register
