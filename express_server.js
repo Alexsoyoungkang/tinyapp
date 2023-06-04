@@ -114,8 +114,15 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
 
 // Login
 app.get("/login", (req, res) => {
+  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const user = users[userId]; // retrive the user object from the users object based on the user id
+  
+  if (userId) {
+    return res.redirect("/urls"); // if the user is loggied in redirect to urls
+  }
+
   const templateVars = {
-    user: users[req.cookies["user_id"]] // identify users by the user_id
+    user: user // user = users[userId]
   };
   res.render("urls_login", templateVars);
 });
@@ -146,8 +153,15 @@ app.post("/logout", (req, res) => {
 
 // Register
 app.get("/register", (req, res) => { // display the register form
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+
+  if (userId) {
+    return res.redirect("urls");
+  }
+
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: user
   };
   res.render("urls_register", templateVars);
 });
