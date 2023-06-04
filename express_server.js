@@ -60,13 +60,25 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  if (!userId) {
+    return res.redirect("/login"); // if the user isn't loggied in redirect to login
+  }
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: user
   };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
+  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+
+  if (!userId) {
+    return res.status(401).send("Please login to create shorten URLs."); // if the user isn't loggied in send the error mssage
+  }
+
   const shortURL = generateRandomString(); // generate a random short URL
   const longURL = req.body.longURL; // get the long URL from the request body
   urlDatabase[shortURL] = longURL; // save the id-longURL pair to the urlDatabase
