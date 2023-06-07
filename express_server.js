@@ -162,6 +162,20 @@ app.get("/", (req, res) => { // client sends a Get request to /
 // Update
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id; // short URL
+  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+
+  if (!urlDatabase[id]) { // check if the URL exsits
+    return res.status(404).send("Requested URL does not exist.");
+  }
+
+  if (!userId) { // check if user is logged in before editing URL
+    return res.status(401).send("Please login to edit this URL.");
+  }
+
+  if (urlDatabase[id].userID !== userId) { // check if user is logged in before deleting URL
+    return res.status(403).send("You do not have access to edit this URL.");
+  }
+
   urlDatabase[id].longURL = req.body.longURL; // update the new long URL into the urlDatabase
   res.redirect("/urls");
 });
@@ -169,8 +183,22 @@ app.post("/urls/:id", (req, res) => {
 
 // Delete
 app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
-  const userInput = req.params.id;
-  delete urlDatabase[userInput];
+  const id = req.params.id;
+  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+
+  if (!urlDatabase[id]) { // check if the URL exsits
+    return res.status(404).send("Requested URL does not exist.");
+  }
+
+  if (!userId) { // check if user is logged in before deleting URL
+    return res.status(401).send("Please login to delete this URL.");
+  }
+
+  if (urlDatabase[id].userID !== userId) { // check if the URL belongs to the user
+    return res.status(403).send("You do not have access to delete this URL.");
+  }
+
+  delete urlDatabase[id]; // remove the URL from the urlDatabase
   res.redirect("/urls");
 });
 
