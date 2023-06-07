@@ -57,10 +57,26 @@ const getUserByEmail = function(email) {
   return null; // Return null if user not found
 };
 
+const urlsForUser = function(id) {
+  const userUrls = {};
+  for (const key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      userUrls[key] = urlDatabase[key];
+    }
+  }
+  return userUrls;
+};
+
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const user = users[userId]; // retrive the user object from the users object based on the user id
+
+  if (!userId) {
+    return res.status(401).send("Please login to view your URLs."); // error message when the user isn't looged in
+  }
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]] //Retrieve the user object directly from the users database using the user_id cookie value
+    urls: urlsForUser(userId),
+    user: user //Retrieve the user object directly from the users database using the user_id cookie value
   };
   res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
 });
@@ -96,11 +112,28 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 
 
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id; // ex) the value "b6UTxQ"
+  const id = req.params.id; // short url ex) the value "b6UTxQ"
   const userId = req.cookies["user_id"];
-  const longURL = urlDatabase[id].longURL;
+  const shortUrl = urlDatabase[id];
+
+  // Check if the user is not logged in
+  if (!userId) {
+    return res.status(401).send("Please login to view this URL.");
+  }
+
+  // Check if the requested URL exists in the database
+  if (!shortUrl) {
+    return res.status(400).send("Requested URL does not exist.");
+  }
+
+  // Check if the URL belongs to the user
+  if (shortUrl.userID !== userId) {
+    return res.status(403).send("You do not have access to view this URL.");
+  }
+
+  const longURL = shortUrl.longURL;
   const templateVars = {
-    id: id, // short url
+    id: id,
     longURL: longURL,
     user: users[userId]
   };
@@ -109,15 +142,17 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const url = urlDatabase[shortURL];
-  if (!url || !url.longURL) {
+  const id = req.params.id;
+  const shortUrl = urlDatabase[id];
+
+  if (!shortUrl || !shortUrl.longURL) {
     return res.status(404).send("Requested Short URL does not exist.");
   }
-  
-  const longURL = url.longURL;
+
+  const longURL = shortUrl.longURL;
   res.redirect(longURL);
 });
+
 
 
 app.get("/", (req, res) => { // client sends a Get request to /
