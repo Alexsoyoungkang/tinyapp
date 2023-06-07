@@ -23,8 +23,14 @@ const generateRandomString = function() { // generating a "unique" Short URL id
 
 // URL Database
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "abc123",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "def456",
+  },
 };
 
 // User Database
@@ -81,28 +87,38 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 
   const shortURL = generateRandomString(); // generate a random short URL
   const longURL = req.body.longURL; // get the long URL from the request body
-  urlDatabase[shortURL] = longURL; // save the id-longURL pair to the urlDatabase
+  urlDatabase[shortURL] = { // update to store an obj with longURL and userID keys and values
+    longURL: longURL,
+    userID: userId
+  };
   res.redirect(`/urls/${shortURL}`); // redirect the user to the show page for the new short URL
 });
 
 
 app.get("/urls/:id", (req, res) => {
+  const id = req.params.id; // ex) the value "b6UTxQ"
+  const userId = req.cookies["user_id"];
+  const longURL = urlDatabase[id].longURL;
   const templateVars = {
-    id: req.params.id, // short url
-    longURL: urlDatabase.id,
-    user: users[req.cookies["user_id"]]
+    id: id, // short url
+    longURL: longURL,
+    user: users[userId]
   };
+
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]; // bring the longURL associated with the shortURL id
-  if (!longURL) {
-    return res.status(404).send("Requested Short URL does not exist."); //redirect to its longURL
+  const shortURL = req.params.id;
+  const url = urlDatabase[shortURL];
+  if (!url || !url.longURL) {
+    return res.status(404).send("Requested Short URL does not exist.");
   }
   
+  const longURL = url.longURL;
   res.redirect(longURL);
 });
+
 
 app.get("/", (req, res) => { // client sends a Get request to /
   res.send("Hello!");  // server sends the response back to the client
@@ -111,8 +127,7 @@ app.get("/", (req, res) => { // client sends a Get request to /
 // Update
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id; // short URL
-  const newURL = req.body.longURL; // get the updated URL(name="longURL") from the request body
-  urlDatabase[id] = newURL; // update the new long URL into the urlDatabase
+  urlDatabase[id].longURL = req.body.longURL; // update the new long URL into the urlDatabase
   res.redirect("/urls");
 });
 
