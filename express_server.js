@@ -194,6 +194,10 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  if (!email || !password) { // check if both email and password fields are provided
+    return res.status(400).send("Please fill in required(Email and Password) fields.");
+  }
+
   if (!getUserByEmail(email)) {  // check if the email is registered
     return res.status(403).send("Email you provided cannot be found");
   }
