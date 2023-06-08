@@ -57,15 +57,17 @@ const users = {
 };
 
 // Helper function to find a user by email
-const getUserByEmail = function(email) {
-  for (const eachUser in users) {
-    if (users[eachUser].email === email) {
-      return users[eachUser];
+// database = users
+const getUserByEmail = function(email, database) {
+  for (const eachUser in database) {
+    if (database[eachUser].email === email) {
+      return database[eachUser];
     }
   }
   return null; // Return null if user not found
 };
 
+// Helper function to find id
 const urlsForUser = function(id) {
   const userUrls = {};
   for (const key in urlDatabase) {
@@ -235,9 +237,9 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Please fill in required(Email and Password) fields.");
   }
 
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
-  if (!getUserByEmail(email)) {  // check if the email is registered
+  if (!getUserByEmail(email, users)) {  // check if the email is registered
     return res.status(403).send("Email you provided cannot be found");
   }
 
@@ -246,7 +248,7 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Wrong password. Try again");
   }
 
-  const userId = getUserByEmail(email).id; // grab the entered data from the form field
+  const userId = getUserByEmail(email, users).id; // grab the entered data from the form field
   req.session.user_id = userId; // set the value, userId to name("user_id")
   res.redirect("/urls");
 });
@@ -283,7 +285,7 @@ app.post("/register", (req, res) => {  // handle the registration form data
   }
 
   // Check if the email already exists in the users object using the helper function
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     return res.status(400).send("The email address provided is already exist.");
   }
   
