@@ -1,3 +1,4 @@
+const { generateRandomString, getUserByEmail } = require("./helpers");
 const express = require("express");
 const cookieSession = require("cookie-session");
 const app = express(); // creates an instance of the express application
@@ -15,20 +16,6 @@ app.use(cookieSession({
 
 // Password hasher
 const bcrypt = require("bcryptjs");
-
-const generateRandomString = function() { // generating a "unique" Short URL id
-  const length = 6;
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    result += characters.charAt(randomIndex);
-  }
-
-  return result;
-};
-
 
 // URL Database
 const urlDatabase = {
@@ -54,17 +41,6 @@ const users = {
     email: "user2@a.com",
     password: bcrypt.hashSync("456", 10),
   },
-};
-
-// Helper function to find a user by email
-// database = users
-const getUserByEmail = function(email, database) {
-  for (const eachUser in database) {
-    if (database[eachUser].email === email) {
-      return database[eachUser];
-    }
-  }
-  return null; // Return null if user not found
 };
 
 // Helper function to find id
@@ -239,7 +215,7 @@ app.post("/login", (req, res) => {
 
   const user = getUserByEmail(email, users);
 
-  if (!getUserByEmail(email, users)) {  // check if the email is registered
+  if (!user) {  // check if the email is registered
     return res.status(403).send("Email you provided cannot be found");
   }
 
@@ -248,7 +224,7 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Wrong password. Try again");
   }
 
-  const userId = getUserByEmail(email, users).id; // grab the entered data from the form field
+  const userId = user.id; // grab the entered data from the form field
   req.session.user_id = userId; // set the value, userId to name("user_id")
   res.redirect("/urls");
 });
