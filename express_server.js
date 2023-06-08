@@ -7,6 +7,9 @@ app.set("view engine", "ejs"); // let the Express app to use EJS as its templati
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // create/populate req.cookies
 
+// Password hasher
+const bcrypt = require("bcryptjs");
+
 const generateRandomString = function() { // generating a "unique" Short URL id
   const length = 6;
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -38,12 +41,12 @@ const users = {
   abc123: {
     id: "abc123",
     email: "user@a.com",
-    password: "123",
+    password: bcrypt.hashSync("123", 10),
   },
   def456: {
     id: "def456",
     email: "user2@a.com",
-    password: "456",
+    password: bcrypt.hashSync("456", 10),
   },
 };
 
@@ -226,12 +229,15 @@ app.post("/login", (req, res) => {
     return res.status(400).send("Please fill in required(Email and Password) fields.");
   }
 
+  const user = getUserByEmail(email);
+
   if (!getUserByEmail(email)) {  // check if the email is registered
     return res.status(403).send("Email you provided cannot be found");
   }
 
-  if (getUserByEmail(email).password !== password) { // check if the password is correct
-    return res.status(403).send("Wrong password. Try again");
+  const passwordMatch = bcrypt.compareSync(password, user.password);
+  if (!passwordMatch) {
+    return res.status(400).send("Wrong password. Try again");
   }
 
   const userId = getUserByEmail(email).id; // grab the entered data from the form field
@@ -275,10 +281,11 @@ app.post("/register", (req, res) => {  // handle the registration form data
     return res.status(400).send("The email address provided is already exist.");
   }
   
+  const hashedPassword = bcrypt.hashSync(password, 10);
   users[id] = {
     id : id,
     email: email,
-    password: password
+    password: hashedPassword
   };
   res.cookie("user_id", id); //set the cookie named "user_id" with the value of the generated ID(id)
   res.redirect("/urls");
