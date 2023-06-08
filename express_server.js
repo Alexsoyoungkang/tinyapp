@@ -1,11 +1,17 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const app = express(); // creates an instance of the express application
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs"); // let the Express app to use EJS as its templating engine.
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // create/populate req.cookies
+app.use(cookieSession({
+  name: 'session',
+  keys: ['sksmsgkftndltekvhrlsmsdjqtdj', 'rjsrkdgkwkgyehgkwkghkdlxldok'],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 // Password hasher
 const bcrypt = require("bcryptjs");
@@ -71,7 +77,7 @@ const urlsForUser = function(id) {
 };
 
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const userId = req.session.user_id; // retrieve the user id from the cookies
   const user = users[userId]; // retrive the user object from the users object based on the user id
 
   if (!userId) {
@@ -85,7 +91,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
   
   if (!userId) {
@@ -98,7 +104,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
-  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const userId = req.session.user_id; // retrieve the user id from the cookies
 
   if (!userId) {
     return res.status(401).send("Please login to create shorten URLs."); // if the user isn't loggied in send the error mssage
@@ -116,7 +122,7 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id; // short url ex) the value "b6UTxQ"
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const shortUrl = urlDatabase[id];
 
   // Check if the user is not logged in
@@ -165,7 +171,7 @@ app.get("/", (req, res) => { // client sends a Get request to /
 // Update
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id; // short URL
-  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const userId = req.session.user_id; // retrieve the user id from the cookies
 
   if (!urlDatabase[id]) { // check if the URL exsits
     return res.status(404).send("Requested URL does not exist.");
@@ -187,7 +193,7 @@ app.post("/urls/:id", (req, res) => {
 // Delete
 app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   const id = req.params.id;
-  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const userId = req.session.user_id; // retrieve the user id from the cookies
 
   if (!urlDatabase[id]) { // check if the URL exsits
     return res.status(404).send("Requested URL does not exist.");
@@ -207,7 +213,7 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
 
 // Login
 app.get("/login", (req, res) => {
-  const userId = req.cookies["user_id"]; // retrieve the user id from the cookies
+  const userId = req.session.user_id; // retrieve the user id from the cookies
   const user = users[userId]; // retrive the user object from the users object based on the user id
   
   if (userId) {
@@ -241,19 +247,19 @@ app.post("/login", (req, res) => {
   }
 
   const userId = getUserByEmail(email).id; // grab the entered data from the form field
-  res.cookie("user_id", userId); // set the value, userId to name("user_id")
+  req.session.user_id = userId; // set the value, userId to name("user_id")
   res.redirect("/urls");
 });
 
 // Logout
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
 // Register
 app.get("/register", (req, res) => { // display the register form
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const user = users[userId];
 
   if (userId) {
@@ -287,7 +293,7 @@ app.post("/register", (req, res) => {  // handle the registration form data
     email: email,
     password: hashedPassword
   };
-  res.cookie("user_id", id); //set the cookie named "user_id" with the value of the generated ID(id)
+  req.session.user_id = id; //set the cookie named "user_id" with the value of the generated ID(id)
   res.redirect("/urls");
 });
 
