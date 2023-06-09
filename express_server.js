@@ -10,7 +10,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['sksmsgkftndltekvhrlsmsdjqtdj', 'rjsrkdgkwkgyehgkwkghkdlxldok'],
 
-  // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
@@ -54,6 +53,7 @@ const urlsForUser = function(id) {
   return userUrls;
 };
 
+// DISPLAY all URLs page
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id; // retrieve the user id from the cookies
   const user = users[userId]; // retrive the user object from the users object based on the user id
@@ -68,6 +68,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars); //EJS knows to look inside the views directory for any template files
 });
 
+// DISPLAY create new url form page
 app.get("/urls/new", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
@@ -81,6 +82,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// Create a new url
 app.post("/urls", (req, res) => { // route to handle the POST requests from our form
   const userId = req.session.user_id; // retrieve the user id from the cookies
 
@@ -97,7 +99,7 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
   res.redirect(`/urls/${shortURL}`); // redirect the user to the show page for the new short URL
 });
 
-
+// DISPLAY form to edit a url
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id; // short url ex) the value "b6UTxQ"
   const userId = req.session.user_id;
@@ -128,6 +130,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Redirect from short url to the corresponding long url
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const shortUrl = urlDatabase[id];
@@ -141,12 +144,17 @@ app.get("/u/:id", (req, res) => {
 });
 
 
-
 app.get("/", (req, res) => { // client sends a Get request to /
-  res.send("Hello!");  // server sends the response back to the client
+  const user = req.session.user_id;
+
+  if (user) { // if a user is looged in then redirect to /urls
+    return res.redirect('/urls');
+  }
+
+  res.redirect('/login'); // if not then redirect to /login
 });
 
-// Update
+// Edit url
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id; // short URL
   const userId = req.session.user_id; // retrieve the user id from the cookies
@@ -168,7 +176,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 
-// Delete
+// Delete existing url
 app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   const id = req.params.id;
   const userId = req.session.user_id; // retrieve the user id from the cookies
@@ -189,7 +197,7 @@ app.post("/urls/:id/delete", (req, res) => { //route that removes a URL resource
   res.redirect("/urls");
 });
 
-// Login
+// DISPLAY of the login form
 app.get("/login", (req, res) => {
   const userId = req.session.user_id; // retrieve the user id from the cookies
   const user = users[userId]; // retrive the user object from the users object based on the user id
@@ -204,7 +212,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
-
+// SUBMISSION of the login form
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -235,8 +243,8 @@ app.post("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-// Register
-app.get("/register", (req, res) => { // display the register form
+// DISPLAY of register form
+app.get("/register", (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
@@ -250,7 +258,8 @@ app.get("/register", (req, res) => { // display the register form
   res.render("urls_register", templateVars);
 });
 
-app.post("/register", (req, res) => {  // handle the registration form data
+// SUBMISSION of register form
+app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -275,15 +284,13 @@ app.post("/register", (req, res) => {  // handle the registration form data
   res.redirect("/urls");
 });
 
+// Retrieve JSON page
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n"); //server sends the response using HTML code to the client
-});
-
-app.listen(PORT, () => { //listener
+// Listener
+app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 

@@ -37,7 +37,3 @@ describe('getUserByEmail', function() {
     assert.isNull(user, "User should be undefined");
   });
 });
-
-
-
-
