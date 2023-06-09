@@ -233,6 +233,7 @@ app.post("/login", (req, res) => {
   }
 
   const userId = user.id; // grab the entered data from the form field
+  // eslint-disable-next-line camelcase
   req.session.user_id = userId; // set the value, userId to name("user_id")
   res.redirect("/urls");
 });
@@ -280,6 +281,7 @@ app.post("/register", (req, res) => {
     email: email,
     password: hashedPassword
   };
+  // eslint-disable-next-line camelcase
   req.session.user_id = id; //set the cookie named "user_id" with the value of the generated ID(id)
   res.redirect("/urls");
 });
