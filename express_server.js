@@ -87,7 +87,7 @@ app.post("/urls", (req, res) => { // route to handle the POST requests from our 
   const userId = req.session.user_id; // retrieve the user id from the cookies
 
   if (!userId) {
-    return res.status(401).send("Please login to create shorten URLs."); // if the user isn't loggied in send the error mssage
+    return res.status(401).send("Please login to create short URLs."); // if the user isn't loggied in send the error mssage
   }
 
   const shortURL = generateRandomString(); // generate a random short URL
@@ -136,7 +136,7 @@ app.get("/u/:id", (req, res) => {
   const shortUrl = urlDatabase[id];
 
   if (!shortUrl || !shortUrl.longURL) {
-    return res.status(404).send("Requested Short URL does not exist.");
+    return res.status(404).send("Requested URL Id does not exist.");
   }
 
   const longURL = shortUrl.longURL;
@@ -160,7 +160,7 @@ app.post("/urls/:id", (req, res) => {
   const userId = req.session.user_id; // retrieve the user id from the cookies
 
   if (!urlDatabase[id]) { // check if the URL exsits
-    return res.status(404).send("Requested URL does not exist.");
+    return res.status(404).send("Requested URL Id does not exist.");
   }
 
   if (!userId) { // check if user is logged in before editing URL
@@ -250,7 +250,7 @@ app.get("/register", (req, res) => {
   const user = users[userId];
 
   if (userId) {
-    return res.redirect("urls");
+    return res.redirect("/urls");
   }
 
   const templateVars = {
